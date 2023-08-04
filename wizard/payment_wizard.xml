@@ -1,0 +1,30 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<odoo>
+    <data>
+        <record model="ir.ui.view" id="view_payment_wizard_form">
+            <field name="name">payment.wizard.form</field>
+            <field name="model">payment.wizard</field>
+            <field name="arch" type="xml">
+                <form string="Payment Report">
+                    <group>
+                        <field name="user_id" options="{'no_create': True}"/>
+                        <field name="start_date"/>
+                        <field name="end_date"/>
+                    </group>
+                    <footer>
+                        <button name="generate_report" string="Generar Reporte" type="object" class="btn-primary"/>
+                        <button string="Cancelar" class="btn-secondary" special="cancel"/>
+                    </footer>
+                </form>
+            </field>
+        </record>
+
+        <record model="ir.actions.act_window" id="action_payment_report_wizard">
+            <field name="name">Reporte de pagos</field>
+            <field name="res_model">payment.wizard</field>
+            <field name="view_mode">form</field>
+            <field name="view_id" ref="view_payment_wizard_form"/>
+            <field name="target">new</field>
+        </record>
+    </data>
+</odoo>

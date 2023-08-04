@@ -1,0 +1,102 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<odoo>
+    <template id="payments">
+        <t t-call="web.html_container">
+            <t t-call="web.external_layout">
+                <div class="page">
+                    <div class="container mt-4">
+
+
+                        <h5><span>Caja: <t t-esc="user_id"/></span></h5>
+
+                        <table class="table table-sm">
+                            <tbody>
+                                <t t-foreach="lst_payments" t-as="group">
+                                    <tr>
+                                        <td colspan="4">
+                                            <strong>Diario: <t
+                                                    t-esc="group['group_payment_journal']['journal_id'][1]"/></strong>
+                                        </td>
+                                        <td class="text-right">
+                                            <strong>
+                                                <t t-esc="group['sum_amount_journal']"/>
+                                            </strong>
+                                        </td>
+                                    </tr>
+                                    <t t-foreach="group['payments']" t-as="p">
+
+                                        <tr>
+                                            <td>
+                                                <small t-esc="p['date']"/>
+                                            </td>
+                                            <td>
+                                                <small t-esc="p['name']"/>
+                                            </td>
+                                            <td>
+                                                <small t-esc="p['partner_id']"/>
+                                            </td>
+                                            <td>
+                                                <small t-esc="p['ref']"/>
+                                            </td>
+                                            <t t-set="CurrencyId" t-value="p['currency_id']"/>
+                                            <td class="text-right">
+                                                <small t-esc="p['amount']"
+                                                       t-options="{'widget': 'monetary', 'display_currency': res_company.currency_id}"
+                                                />
+                                            </td>
+                                        </tr>
+                                    </t>
+                                </t>
+                            </tbody>
+                            <tfoot>
+                                <!-- CASH -->
+                                <tr>
+                                    <th rowspan="3">Cash</th>
+                                    <td>venta C-F</td>
+                                    <td><t t-out="amounts['sum_amount_cash_cf']"/></td>
+                                    <td rowspan="3"><t t-out="amounts['sum_amount_cash_cf']+amounts['sum_amount_cash_sf']+amounts['sum_amount_cash_sc']"/></td>
+                                </tr>
+                                <tr>
+                                    <td>Venta S-F</td>
+                                    <td><t t-out="amounts['sum_amount_cash_sf']"/></td>
+                                </tr>
+                                <tr>
+                                    <td>Pago S-C</td>
+                                    <td><t t-out="amounts['sum_amount_cash_sc']"/></td>
+                                </tr>
+                                <!-- BANK -->
+                                <tr>
+                                    <th rowspan="3">Bank</th>
+                                    <td>venta C-F</td>
+                                    <td><t t-out="amounts['sum_amount_bank_cf']"/></td>
+                                    <td rowspan="3"><t t-out="amounts['sum_amount_bank_cf']+amounts['sum_amount_bank_sf']+amounts['sum_amount_bank_sc']"/></td>
+                                </tr>
+                                <tr>
+                                    <td>Venta S-F</td>
+                                    <td><t t-out="amounts['sum_amount_bank_sf']"/></td>
+                                </tr>
+                                <tr>
+                                    <td>Pago S-C</td>
+                                    <td><t t-out="amounts['sum_amount_bank_sc']"/></td>
+                                </tr>
+                            </tfoot>
+                        </table>
+
+                        <div class="row justify-content-center">
+                            <div class="col-4">
+                                <div style="border-bottom: 1px solid #ccc; height: 6em;"/>
+                                <h6 style="text-align: center;">Recibi Conforme<br/>
+                                    <t t-esc="context_timestamp(datetime.datetime.now()).strftime('%Y-%m-%d %H:%M')"/></h6>
+                            </div>
+                            <div class="col-4">
+                                <div style="border-bottom: 1px solid #ccc; height: 6em;"/>
+                                <h6 style="text-align: center;">Entregue Conforme<br/>
+                                    <t t-esc="context_timestamp(datetime.datetime.now()).strftime('%Y-%m-%d %H:%M')"/></h6>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </t>
+        </t>
+    </template>
+</odoo>
