@@ -79,7 +79,7 @@ class PaymentWizard(models.TransientModel):
                             amounts[
                                 'sum_amount_bank_cf'] += item.amount if item.payment_type == 'inbound' else item.amount * -1
                         else:
-                            amounts['sum_amount_bank_sf'] += item.amount if item.payment_type == 'inbound' else item.amount * -1,
+                            amounts['sum_amount_bank_sf'] += item.amount if item.payment_type == 'inbound' else item.amount * -1
                     else:
                         if item.reconciled_bill_ids:
                             if item.reconciled_bill_ids[0].journal_id.l10n_latam_use_documents:
@@ -89,7 +89,7 @@ class PaymentWizard(models.TransientModel):
                                 amounts[
                                     'sum_amount_bank_sf'] += item.amount if item.payment_type == 'inbound' else item.amount * -1
                         else:
-                            amounts['sum_amount_bank_sc'] += item.amount if item.payment_type == 'inbound' else item.amount * -1,
+                            amounts['sum_amount_bank_sc'] += item.amount if item.payment_type == 'inbound' else item.amount * -1
 
             dict_payments['sum_amount_journal'] = sum(x['amount'] for x in dict_payments['payments'])
 
