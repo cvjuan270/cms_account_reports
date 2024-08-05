@@ -94,6 +94,12 @@
                                     <t t-esc="context_timestamp(datetime.datetime.now()).strftime('%Y-%m-%d %H:%M')"/></h6>
                             </div>
                         </div>
+                        <div class="row">
+                            <div class="col-6">
+                                <img t-att-src="'/report/barcode/?barcode_type=%s&amp;value=%s&amp;width=%s&amp;height=%s' % ('QR', qr_and_hash['qr'],100,100)"/>
+                                <p><t t-esc="qr_and_hash['hash']"/></p>
+                            </div>
+                        </div>
                     </div>
                 </div>
             </t>

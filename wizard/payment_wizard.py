@@ -2,6 +2,7 @@ import io
 from itertools import groupby
 from odoo import models, fields, api
 from odoo.exceptions import UserError
+import hashlib
 
 
 class PaymentWizard(models.TransientModel):
@@ -18,6 +19,39 @@ class PaymentWizard(models.TransientModel):
             if item['journal_id'] == journal_id:
                 return item
         return False
+
+    @api.model
+    def _get_qr_and_hash(self, lst, amounts):
+        # - Usuario
+        #  - Fecha y hora de generación del documento 
+        # - Nombre de la Caja 
+        # - Diario
+        #  - Rango de Fechas contemplado al momento de la generación del reporte
+        #  - Efectivo (Cash) - Venta con Factura (venta C-F) 
+        #  - Venta sin Factura (Venta S-F)
+        #  - Pagos sin comprobante asociado (Pago S-C)
+        #  - Bancos (Bank) 
+        #  - Venta con Factura (venta C-F)
+        #  - Venta sin Factura (Venta S-F) 
+        #  - Pagos sin comprobante asociado (Pago S-C) 
+        # - Total
+        rslt = {'qr': '', 'hash': ''}
+        qr = "%s|%s|%s|%s|%s|%s|%s|%s|%s|%s|%s" % (
+            self.env.user.name,
+            str(fields.Datetime.now()),
+            self.user_id.name,
+            str(self.start_date) + '-' + str(self.end_date),
+            amounts['sum_amount_cash_cf'],
+            amounts['sum_amount_cash_sf'],
+            amounts['sum_amount_cash_sc'],
+            amounts['sum_amount_bank_cf'],
+            amounts['sum_amount_bank_sf'],
+            amounts['sum_amount_bank_sc'],
+            sum(amounts.values())
+            )
+        rslt['qr'] = qr
+        rslt['hash'] = hashlib.sha256(qr.encode('utf-8')).hexdigest()
+        return rslt
 
     def generate_report(self):
         lst = []
@@ -103,7 +137,8 @@ class PaymentWizard(models.TransientModel):
             # 'amount_invoices_sc': amount_invoices_sc,
             # 'amount_cash': sum(payment['amount'] for payment in payments if payment.journal_id.type == 'cash'),
             # 'amount_bank': sum(payment['amount'] for payment in payments if payment.journal_id.type == 'bank'),
-            'res_company': self.env.company
+            'res_company': self.env.company,
+            'qr_and_hash': self._get_qr_and_hash(lst, amounts),
         }
 
         report = self.env['ir.actions.report'].search([('report_name', '=', 'cms_account_reports.payments')],
