@@ -1,8 +1,11 @@
 import io
 from itertools import groupby
 from odoo import models, fields, api
-from odoo.exceptions import UserError
+from datetime import datetime
 import hashlib
+import pytz
+
+pe_tz = pytz.timezone('America/Lima')
 
 
 class PaymentWizard(models.TransientModel):
@@ -22,23 +25,10 @@ class PaymentWizard(models.TransientModel):
 
     @api.model
     def _get_qr_and_hash(self, lst, amounts):
-        # - Usuario
-        #  - Fecha y hora de generación del documento 
-        # - Nombre de la Caja 
-        # - Diario
-        #  - Rango de Fechas contemplado al momento de la generación del reporte
-        #  - Efectivo (Cash) - Venta con Factura (venta C-F) 
-        #  - Venta sin Factura (Venta S-F)
-        #  - Pagos sin comprobante asociado (Pago S-C)
-        #  - Bancos (Bank) 
-        #  - Venta con Factura (venta C-F)
-        #  - Venta sin Factura (Venta S-F) 
-        #  - Pagos sin comprobante asociado (Pago S-C) 
-        # - Total
         rslt = {'qr': '', 'hash': ''}
         qr = "%s|%s|%s|%s|%s|%s|%s|%s|%s|%s|%s" % (
             self.env.user.name,
-            str(fields.Datetime.now()),
+            str(datetime.now(pe_tz)),
             self.user_id.name,
             str(self.start_date) + '-' + str(self.end_date),
             amounts['sum_amount_cash_cf'],
