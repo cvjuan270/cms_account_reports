@@ -1,0 +1,157 @@
+/* General Styles */
+a {
+  color: #005bb5;
+}
+
+.report_container {
+  display: flex;
+  flex-direction: column;
+  background-color: #ffffff;
+}
+
+.report_row {
+  display: flex;
+  flex-direction: row;
+  page-break-inside: avoid;
+}
+
+.report_cell {
+  display: flex;
+  flex: 1;
+  page-break-inside: avoid;
+}
+
+.report_header {
+  display: flex;
+  font-weight: bold;
+  background-color: #e0e0e0;
+}
+
+.report_body {
+  display: flex;
+  flex-direction: column;
+}
+
+.report_table,
+.report_data_table,
+.report_totals_table {
+  width: 100%;
+  border-collapse: collapse;
+}
+
+.report_row.header {
+  background-color: #f5f5f5;
+}
+
+.report_table,
+.report_data_table,
+.report_totals_table,
+.report_table .report_row {
+  text-align: center;
+  font-size: 12px;
+  padding: 5px;
+  border-left: 0;
+  border-right: 0;
+}
+
+.report_totals_table {
+  font-weight: bold;
+  text-align: center;
+}
+
+.report_table .report_row.header,
+.report_table .report_row.balance_initial,
+.report_table .report_row.lines {
+  border-bottom: 1px solid #cccccc;
+}
+
+.report_data_table .report_cell {
+  border: 1px solid #cccccc;
+  text-align: center;
+}
+
+.report_data_table .report_cell,
+.report_table .report_cell,
+.report_totals_table .report_cell {
+  word-wrap: break-word;
+}
+
+.report_data_table .report_row.header,
+.report_totals_table .report_row.header {
+  font-weight: bold;
+}
+
+.balance_initial .report_cell {
+  font-style: italic;
+}
+
+.account_heading {
+  font-size: 13px;
+  font-weight: bold;
+}
+
+.account_heading.header {
+  background-color: #e0e0e0;
+}
+
+.report_cell.amount {
+  word-wrap: normal;
+  text-align: right;
+}
+
+.report_cell.align_left {
+  text-align: left;
+}
+
+.report_cell.align_right {
+  text-align: right;
+}
+
+.report_table .report_cell.first_column {
+  padding-left: 0;
+  /* Uncomment below line to enable column borders */
+  /* border-left: 1px solid #cccccc; */
+}
+
+.overflow_ellipsis {
+  text-overflow: ellipsis;
+  overflow: hidden;
+  white-space: nowrap;
+}
+
+.custom_footer {
+  font-size: 8px;
+}
+
+.page_break {
+  page-break-inside: avoid;
+}
+
+.action_row {
+  padding-bottom: 15px;
+}
+
+.report_page {
+  padding: 15px;
+  width: 85%;
+  margin: 0 auto;
+  font-family: "Arial", sans-serif;
+}
+
+/* Button Row Styling */
+.button_row {
+  display: flex;
+  justify-content: flex-end;
+  padding: 15px 0;
+}
+
+/* Custom colors for modern look */
+.report_header {
+  background-color: #d1e9f5;
+  color: #003366;
+}
+
+.report_totals_table {
+  background-color: #f8f8f8;
+  color: #333333;
+}

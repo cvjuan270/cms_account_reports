@@ -1,10 +1,14 @@
-<?xml version="1.0" encoding="UTF-8" ?>
+<?xml version="1.0" encoding="UTF-8"?>
 <odoo>
-    <menuitem id="menu_cms_account_reports"
-              name="CMS Reportes"
-              parent="account.menu_finance_reports"/>
-    <menuitem id="menu_cms_account_reports_payments"
-              name="Reporte de Pagos por Caja"
-              parent="menu_cms_account_reports"
-              action="cms_account_reports.action_payment_report_wizard"/>
+  <menuitem id="menu_cms_account_reports"
+    name="CMS Reportes"
+    parent="account.menu_finance_reports" />
+  <menuitem id="menu_cms_account_reports_payments"
+    name="Reporte de Pagos por Caja"
+    parent="menu_cms_account_reports"
+    action="cms_account_reports.action_payment_report_wizard" />
+  <menuitem id="menu_cms_account_reports_aged"
+    name="Cuentas por Cobrar y por Pagar"
+    parent="menu_cms_account_reports"
+    action="cms_account_reports.action_report_aged_wizard" />
 </odoo>

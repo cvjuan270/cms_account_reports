@@ -1,0 +1,167 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<odoo>
+  <template id="report_aged_view">
+    <t t-call="web.html_container">
+      <t t-foreach="docs" t-as="o">
+        <t t-call="cms_account_reports.internal_layout">
+          <t t-call="cms_account_reports.report_aged_base" />
+
+        </t>
+      </t>
+    </t>
+  </template>
+
+  <template id="report_aged_base">
+    <div class="page">
+      <div class="row">
+        <h4 class="mt0" t-esc="'Reporte Cuentas por Cobrar y por Pagar '" />
+        <t t-call="cms_account_reports.report_aged_filters" />
+        <t t-call="cms_account_reports.report_aged_payment" />
+        <t t-call="cms_account_reports.report_aged_recive" />
+      </div>
+    </div>
+  </template>
+
+  <!-- Por Pagar-->
+
+  <template id="report_aged_payment">
+    <div class="report_header">
+      <div class="report_cell">
+        <p>Cuentas por Pagar:</p>
+      </div>
+    </div>
+    <table class="table table-sm table-striped">
+      <t t-call="cms_account_reports.report_aged_table_header" />
+      <tbody>
+        <t t-foreach="i_aged_payment" t-as="l">
+          <t t-call="cms_account_reports.report_table_line" />
+        </t>
+      </tbody>
+      <tfoot>
+        <tr>
+          <th colspan="6">Total</th>
+          <th style="text-align:right;">
+            <span t-esc="round(sum(i_a_p['total'] for i_a_p in i_aged_payment),2)" />
+          </th>
+          <th style="text-align:right;">
+            <span t-esc="round(sum(abs(i_a_p['residual']) for i_a_p in i_aged_payment),2)" />
+          </th>
+        </tr>
+      </tfoot>
+    </table>
+  </template>
+
+  <!-- Por Cobrar-->
+  <template id="report_aged_recive">
+    <div class="report_header">
+      <div class="report_cell">
+        <p>Cuentas por Cobrar:</p>
+      </div>
+    </div>
+    <table class="table table-sm table-striped">
+      <t t-call="cms_account_reports.report_aged_table_header" />
+      <tbody>
+        <t t-foreach="i_aged_receive" t-as="l">
+          <t t-call="cms_account_reports.report_table_line" />
+        </t>
+      </tbody>
+      <tfoot>
+        <tr>
+          <th colspan="6">Total</th>
+          <th style="text-align:right;">
+            <span t-esc="round(sum(i_a_r['total'] for i_a_r in i_aged_receive),2)" />
+          </th>
+          <th style="text-align:right;">
+            <span t-esc="round(sum(abs(i_a_r['residual']) for i_a_r in i_aged_receive),2)" />
+          </th>
+        </tr>
+      </tfoot>
+    </table>
+
+  </template>
+
+  <!-- table header-->
+  <template id="report_aged_table_header">
+    <thead>
+      <tr>
+        <th style="font-size:10px;">Contacto</th>
+        <th style="font-size:10px;">Paciente</th>
+        <th style="font-size:10px;">Medico</th>
+        <th style="font-size:10px;">Referencia</th>
+        <th style="font-size:10px;">Numero</th>
+        <th style="font-size:10px;">Fecha</th>
+        <th style="font-size:10px; text-align:right;">Monto</th>
+        <th style="font-size:10px; text-align:right;">Monto Pendiente</th>
+        <th style="font-size:10px; text-align:right;">Dias de Retraso</th>
+        <th style="font-size:10px;">Vendedor</th>
+      </tr>
+    </thead>
+  </template>
+
+  <!-- table Line-->
+  <template id="report_table_line">
+    <tr>
+      <td style="font-size:10px;">
+        <span t-esc="l['partner_id']" />
+      </td>
+      <td style="font-size:8px;">
+        <span t-esc="l['patient_id']" />
+      </td>
+      <td style="font-size:8px;">
+        <span t-esc="l['physician_id']" />
+      </td>
+      <td style="font-size:10px;">
+        <span t-esc="l['ref']" />
+      </td>
+      <td style="font-size:10px;">
+        <span
+          t-att-res-id="l['entry_id']"
+          res-model="account.move"
+          view-type="form"
+        >
+          <t t-esc="l['name']" />
+        </span>
+      </td>
+      <td style="font-size:10px;">
+        <span t-esc="l['date']" />
+      </td>
+      <td style="font-size:10px; text-align:right;">
+        <span t-esc="l['total']" />
+      </td>
+      <td style="font-size:10px; text-align:right;">
+        <span t-esc="abs(l['residual'])" />
+      </td>
+      <td style="font-size:10px; text-align:right;">
+        <span t-esc="l['dias_retraso']" />
+      </td>
+      <td style="font-size:8px;">
+        <span t-esc="l['invoice_user_id']" />
+      </td>
+    </tr>
+  </template>
+
+
+  <!-- filters-->
+  <template id="report_aged_filters">
+    <div class="report_table data_table" style="width:100%;">
+      <div class="report_row labels">
+        <div class="report_cell">Fechas</div>
+      </div>
+      <div class="report_row">
+        <div class="report_cell">
+          <span t-esc="start_date" />
+          <div class="report_cell">
+            <span t-esc="end_date" />
+          </div>
+        </div>
+      </div>
+    </div>
+  </template>
+
+  <record id="report_aged_report" model="ir.actions.report">
+    <field name="name">Reporte de Vencido por Cobrar y por Pagar</field>
+    <field name="model">aged.wizard</field>
+    <field name="report_type">qweb-html</field>
+    <field name="report_name">cms_account_reports.report_aged_view</field>
+  </record>
+</odoo>
