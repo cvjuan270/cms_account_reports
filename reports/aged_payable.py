@@ -14,11 +14,9 @@ class CmsAgedPayable(models.AbstractModel):
 
     @api.model
     def _get_report_values(self, docids, data=None):
-        print(data)
         moves = self.env["account.move"].search(self._get_domain(data))
         invoices = []
         for move in moves:
-            print(move.name)
             invoices.append(
                 {
                     "partner_id": "%s-%s" % (move.partner_id.vat, move.partner_id.name),
