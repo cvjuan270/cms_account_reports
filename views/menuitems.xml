@@ -7,8 +7,12 @@
     name="Reporte de Pagos por Caja"
     parent="menu_cms_account_reports"
     action="cms_account_reports.action_payment_report_wizard" />
-  <menuitem id="menu_cms_account_reports_aged"
-    name="Cuentas por Cobrar y por Pagar"
+  <menuitem id="menu_cms_account_reports_aged_payable" groups="account.group_account_invoice"
+    name="Cuentas por Pagar"
     parent="menu_cms_account_reports"
-    action="cms_account_reports.action_report_aged_wizard" />
+    action="cms_account_reports.action_aged_payable_wizard" />
+  <menuitem id="menu_cms_account_reports_aged_receivable" groups="account.group_account_invoice"
+    name="Cuentas por Cobrar"
+    parent="menu_cms_account_reports"
+    action="cms_account_reports.action_aged_receivable_wizard" />
 </odoo>

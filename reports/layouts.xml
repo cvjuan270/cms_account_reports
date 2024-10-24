@@ -29,4 +29,67 @@
       </div>
     </div>
   </template>
+  <!-- table header-->
+  <template id="aged_table_header">
+    <thead>
+      <tr>
+        <th style="font-size:10px;">Contacto</th>
+        <th style="font-size:10px;">Paciente</th>
+        <th style="font-size:10px;">Medico</th>
+        <th style="font-size:10px;">Referencia</th>
+        <th style="font-size:10px;">Numero</th>
+        <th style="font-size:10px;">Fecha</th>
+        <th style="font-size:10px;">CMS - Fecha Operativa</th>
+        <th style="font-size:10px; text-align:right;">Monto</th>
+        <th style="font-size:10px; text-align:right;">Monto Pendiente</th>
+        <th style="font-size:10px; text-align:right;">Dias de Retraso</th>
+        <th style="font-size:10px;">Vendedor</th>
+      </tr>
+    </thead>
+  </template>
+
+  <!-- table Line-->
+  <template id="aged_table_line">
+    <tr>
+      <td style="font-size:10px;">
+        <span t-esc="l['partner_id']" />
+      </td>
+      <td style="font-size:8px;">
+        <span t-esc="l['patient_id']" />
+      </td>
+      <td style="font-size:8px;">
+        <span t-esc="l['physician_id']" />
+      </td>
+      <td style="font-size:10px;">
+        <span t-esc="l['ref']" />
+      </td>
+      <td style="font-size:10px;">
+        <span
+          t-att-res-id="l['entry_id']"
+          res-model="account.move"
+          view-type="form"
+        >
+          <t t-esc="l['name']" />
+        </span>
+      </td>
+      <td style="font-size:10px;">
+        <span t-esc="l['date']" />
+      </td>
+      <td style="font-size:10px;">
+        <span t-esc="l['cms_a_r_operation_date']" />
+      </td>
+      <td style="font-size:10px; text-align:right;">
+        <span t-esc="l['total']" />
+      </td>
+      <td style="font-size:10px; text-align:right;">
+        <span t-esc="abs(l['residual'])" />
+      </td>
+      <td style="font-size:10px; text-align:right;">
+        <span t-esc="l['dias_retraso']" />
+      </td>
+      <td style="font-size:8px;">
+        <span t-esc="l['invoice_user_id']" />
+      </td>
+    </tr>
+  </template>
 </odoo>

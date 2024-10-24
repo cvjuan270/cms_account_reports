@@ -1,25 +1,40 @@
-<?xml version="1.0" encoding="UTF-8" ?>
+<?xml version="1.0" encoding="UTF-8"?>
 <odoo>
-     <record id="paperformat_cms_account_report" model="report.paperformat">
-            <field name="name">CMS A4</field>
-            <field name="default" eval="True" />
-            <field name="format">A4</field>
-            <field name="orientation">Portrait</field>
-            <field name="margin_top">14</field>
-            <field name="margin_bottom">5</field>
-            <field name="margin_left">2</field>
-            <field name="margin_right">2</field>
-            <field name="header_line" eval="False" />
-            <field name="header_spacing">12</field>
-            <field name="dpi">120</field>
-        </record>
+  <record id="paperformat_cms_account_report" model="report.paperformat">
+    <field name="name">CMS A4</field>
+    <field name="default" eval="True" />
+    <field name="format">A4</field>
+    <field name="orientation">Portrait</field>
+    <field name="margin_top">14</field>
+    <field name="margin_bottom">5</field>
+    <field name="margin_left">2</field>
+    <field name="margin_right">2</field>
+    <field name="header_line" eval="False" />
+    <field name="header_spacing">12</field>
+    <field name="dpi">120</field>
+  </record>
 
-    <record id="action_print_report_payments" model="ir.actions.report">
-        <field name="name">Pagos por caja</field>
-        <field name="model">payment.wizard</field>
-        <field name="report_type">qweb-html</field>
-        <field name="report_name">cms_account_reports.payments</field>
-<!--        <field name="report_file">cms_account_reports.payments</field>-->
-        <field name="paperformat_id" ref="cms_account_reports.paperformat_cms_account_report" />
-    </record>
+  <record id="action_print_report_payments" model="ir.actions.report">
+    <field name="name">Pagos por caja</field>
+    <field name="model">payment.wizard</field>
+    <field name="report_type">qweb-html</field>
+    <field name="report_name">cms_account_reports.payments</field>
+    <!--        <field name="report_file">cms_account_reports.payments</field>-->
+    <field name="paperformat_id" ref="cms_account_reports.paperformat_cms_account_report" />
+  </record>
+
+  <record id="report_aged_payable" model="ir.actions.report">
+    <field name="name">Reporte por Pagar</field>
+    <field name="model">cms_account_reports.aged_payable_wizard</field>
+    <field name="report_type">qweb-html</field>
+    <field name="report_name">cms_account_reports.aged_payable</field>
+  </record>
+
+  <record id="report_aged_receivable" model="ir.actions.report">
+    <field name="name">Reporte por Cobrar</field>
+    <field name="model">cms_account_reports.aged_receivable_wizard</field>
+    <field name="report_type">qweb-html</field>
+    <field name="report_name">cms_account_reports.aged_receivable</field>
+
+  </record>
 </odoo>
