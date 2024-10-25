@@ -1,44 +1,76 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <odoo>
-  <template id="cms_account_reports.internal_layout">
-    <div class="article report_page">
-      <link
-        href="/cms_account_reports/static/src/css/report.css"
-        rel="stylesheet"
-      />
-      <t t-out="0" />
-    </div>
-    <div class="footer">
-      <div class="row">
-        <div class="col-6 custom_footer">
-          <span
-            t-esc="context_timestamp(datetime.datetime.now()).strftime('%Y-%m-%d %H:%M')"
-          />
-        </div>
-        <div class="col-6 text-right custom_footer">
-          <ul class="list-inline">
-            <li class="list-inline-item">
-              <span class="page" />
-            </li>
-            <li class="list-inline-item">/</li>
-            <li class="list-inline-item">
-              <span class="topage" />
-            </li>
-          </ul>
-        </div>
-      </div>
-    </div>
+  <!-- table filters -->
+  <template id="aged_filters">
+    <table class="table table-sm">
+      <thead>
+        <tr style="font-size:10px;">
+          <th>Fecha Inicio</th>
+          <th>Fecha Fin</th>
+          <t t-if="o.partner_ids">
+            <th>Contactos</th>
+          </t>
+          <t t-if="o.journal_ids">
+            <th>Diarios</th>
+          </t>
+          <t t-if="o.patient_ids">
+            <th>Pacientes</th>
+          </t>
+          <t t-if="o.physician_ids">
+            <th>Medicos</th>
+          </t>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td>
+            <span t-esc="o.start_date.strftime('%d/%m/%Y')" />
+          </td>
+          <td>
+            <span t-esc="o.end_date.strftime('%d/%m/%Y')" />
+          </td>
+          <t t-if="o.partner_ids">
+            <td>
+              <t t-foreach="o.partner_ids" t-as="p">
+                <span t-esc="p.name" /> - </t>
+            </td>
+          </t>
+          <t t-if="o.journal_ids">
+            <td>
+              <t t-foreach="o.journal_ids" t-as="j">
+                <span t-esc="j.name" /> - </t>
+            </td>
+          </t>
+          <t t-if="o.patient_ids">
+            <td>
+              <t t-foreach="o.patient_ids" t-as="p">
+                <span t-esc="p.name" /> - </t>
+            </td>
+          </t>
+          <t t-if="o.physician_ids">
+            <td>
+              <t t-foreach="o.physician_ids" t-as="ph">
+                <span t-esc="ph.name" /> - </t>
+            </td>
+          </t>
+        </tr>
+      </tbody>
+    </table>
   </template>
+
   <!-- table header-->
   <template id="aged_table_header">
     <thead>
       <tr>
         <th style="font-size:10px;">Contacto</th>
-        <th style="font-size:10px;">Paciente</th>
-        <th style="font-size:10px;">Medico</th>
+        <t t-if="a_receivable">
+          <th style="font-size:10px;">Paciente</th>
+          <th style="font-size:10px;">Medico</th>
+        </t>
         <th style="font-size:10px;">Referencia</th>
         <th style="font-size:10px;">Numero</th>
-        <th style="font-size:10px;">Fecha</th>
+        <th style="font-size:10px;">Fecha Emision</th>
+        <th style="font-size:10px;">Fecha Vencimiento</th>
         <th style="font-size:10px;">CMS - Fecha Operativa</th>
         <th style="font-size:10px; text-align:right;">Monto</th>
         <th style="font-size:10px; text-align:right;">Monto Pendiente</th>
@@ -52,43 +84,48 @@
   <template id="aged_table_line">
     <tr>
       <td style="font-size:10px;">
-        <span t-esc="l['partner_id']" />
+        <span t-esc="l['partner_id' ]" />
       </td>
-      <td style="font-size:8px;">
-        <span t-esc="l['patient_id']" />
-      </td>
-      <td style="font-size:8px;">
-        <span t-esc="l['physician_id']" />
-      </td>
+      <t t-if="a_receivable">
+        <td style="font-size:8px;">
+          <span t-esc="l['patient_id' ]" />
+        </td>
+        <td style="font-size:8px;">
+          <span t-esc="l['physician_id' ]" />
+        </td>
+      </t>
       <td style="font-size:10px;">
-        <span t-esc="l['ref']" />
+        <span t-esc="l['ref' ]" />
       </td>
       <td style="font-size:10px;">
         <span
-          t-att-res-id="l['entry_id']"
+          t-att-res-id="l['entry_id' ]"
           res-model="account.move"
           view-type="form"
         >
-          <t t-esc="l['name']" />
+          <t t-esc="l['name' ]" />
         </span>
       </td>
       <td style="font-size:10px;">
-        <span t-esc="l['date']" />
+        <span t-esc="l['invoice_date' ]" />
       </td>
       <td style="font-size:10px;">
-        <span t-esc="l['cms_a_r_operation_date']" />
+        <span t-esc="l['invoice_date_due' ]" />
+      </td>
+      <td style="font-size:10px;">
+        <span t-esc="l['cms_a_r_operation_date' ]" />
       </td>
       <td style="font-size:10px; text-align:right;">
-        <span t-esc="l['total']" />
+        <span t-esc="l['total' ]" />
       </td>
       <td style="font-size:10px; text-align:right;">
-        <span t-esc="abs(l['residual'])" />
+        <span t-esc="abs(l['residual' ])" />
       </td>
       <td style="font-size:10px; text-align:right;">
-        <span t-esc="l['dias_retraso']" />
+        <span t-esc="l['dias_retraso' ]" />
       </td>
       <td style="font-size:8px;">
-        <span t-esc="l['invoice_user_id']" />
+        <span t-esc="l['invoice_user_id' ]" />
       </td>
     </tr>
   </template>

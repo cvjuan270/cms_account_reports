@@ -3,7 +3,7 @@
   <template id="aged_receivable">
     <t t-call="web.html_container">
       <t t-foreach="docs" t-as="o">
-        <t t-call="cms_account_reports.internal_layout">
+        <t t-call="web.external_layout">
           <t t-call="cms_account_reports.aged_receivable_base" />
         </t>
       </t>
@@ -12,9 +12,12 @@
 
   <template id="aged_receivable_base">
     <div class="page">
-      <div class="row">
+      <div class="container mt-4">
         <h4>REPORTE DE CUENTAS POR COBRAR</h4>
-        <table class="table table-sm table-striped">
+        <t t-call="cms_account_reports.aged_filters" />
+        <br />
+        <t t-set="a_receivable" t-value="True" />
+        <table class="table table-sm">
           <t t-call="cms_account_reports.aged_table_header" />
           <tbody>
             <t t-foreach="invoices" t-as="l">

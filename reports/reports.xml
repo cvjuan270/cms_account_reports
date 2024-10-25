@@ -35,6 +35,5 @@
     <field name="model">cms_account_reports.aged_receivable_wizard</field>
     <field name="report_type">qweb-html</field>
     <field name="report_name">cms_account_reports.aged_receivable</field>
-
   </record>
 </odoo>

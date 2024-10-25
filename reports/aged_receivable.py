@@ -17,7 +17,6 @@ class CmsAgedReceivable(models.AbstractModel):
         moves = self.env["account.move"].search(self._get_domain(data))
         invoices = []
         for move in moves:
-            print(move.name)
             invoices.append(
                 {
                     "partner_id": "%s-%s" % (move.partner_id.vat, move.partner_id.name),
@@ -25,10 +24,12 @@ class CmsAgedReceivable(models.AbstractModel):
                     "physician_id": move.physician_id.name
                     if move.physician_id
                     else None,
-                    "ref": move.ref or None,
+                    "ref": self._get_ref(move, self.get_source_orders_sale),
                     "entry_id": move.id,
                     "name": move.name or None,
                     "date": move.date.strftime("%d/%m/%Y"),
+                    "invoice_date": move.invoice_date.strftime("%d/%m/%Y"),
+                    "invoice_date_due": move.invoice_date_due.strftime("%d/%m/%Y"),
                     "total_signed": move.amount_total_signed,
                     "total": move.amount_total,
                     "residual": move.amount_residual_signed,
@@ -49,7 +50,9 @@ class CmsAgedReceivable(models.AbstractModel):
         wizard_id = data["wizard_id"]
         return {
             "doc_ids": [wizard_id],
-            "doc_model": "aged.wizard",
-            "docs": self.env["aged.wizard"].browse(wizard_id),
+            "doc_model": "cms_account_reports.aged_receivable_wizard",
+            "docs": self.env["cms_account_reports.aged_receivable_wizard"].browse(
+                wizard_id
+            ),
             "invoices": invoices,
         }

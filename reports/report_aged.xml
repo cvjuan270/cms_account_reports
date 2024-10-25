@@ -2,10 +2,12 @@
 <odoo>
   <template id="report_aged_view">
     <t t-call="web.html_container">
-      <t t-foreach="docs" t-as="o">
-        <t t-call="cms_account_reports.internal_layout">
-          <t t-call="cms_account_reports.report_aged_base" />
+      <t t-call="web.external_layout">
+        <t t-foreach="docs" t-as="o">
+          <t t-call="cms_account_reports.internal_layout">
+            <t t-call="cms_account_reports.report_aged_base" />
 
+          </t>
         </t>
       </t>
     </t>
@@ -13,11 +15,13 @@
 
   <template id="report_aged_base">
     <div class="page">
-      <div class="row">
-        <h4 class="mt0" t-esc="'Reporte Cuentas por Cobrar y por Pagar '" />
-        <t t-call="cms_account_reports.report_aged_filters" />
-        <t t-call="cms_account_reports.report_aged_payment" />
-        <t t-call="cms_account_reports.report_aged_recive" />
+      <div class="container mt-4">
+        <div class="row">
+          <h4 class="mt0" t-esc="'Reporte Cuentas por Cobrar y por Pagar '" />
+          <t t-call="cms_account_reports.report_aged_filters" />
+          <t t-call="cms_account_reports.report_aged_payment" />
+          <t t-call="cms_account_reports.report_aged_recive" />
+        </div>
       </div>
     </div>
   </template>
