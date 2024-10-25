@@ -1,4 +1,4 @@
-from odoo import models, api
+from odoo import models
 
 
 class CmsAbstractReport(models.AbstractModel):
@@ -42,9 +42,9 @@ class CmsAbstractReport(models.AbstractModel):
             or not source_orders.exists()
         ):
             return move_ref
-        elif isinstance(source_orders, list):
-            orders_text = ", ".join(
-                str(order.name) for order in source_orders if order.name
-            )
-            return f"{move_ref}, {orders_text}" if move_ref else orders_text
-        return f"{move_ref}, {source_orders.name}" if move_ref else source_orders.name
+        if not isinstance(source_orders, list):
+            orders_list = source_orders
+        else:
+            orders_list = source_orders
+        orders_text = ", ".join(str(order.name) for order in orders_list if order.name)
+        return f"{move_ref}, {orders_text}" if move_ref else orders_text
