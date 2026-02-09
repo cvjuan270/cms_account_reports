@@ -1,10 +1,9 @@
-from collections import defaultdict
-from datetime import datetime
 from odoo import models, fields, api
 
 
 class ReportAged(models.AbstractModel):
     _name = "report.cms_account_reports.report_aged_view"
+    _description = "Report Aged View"
 
     def _get_domain(self, data):
         domain = [
@@ -17,7 +16,6 @@ class ReportAged(models.AbstractModel):
             ("amount_residual_signed", "!=", 0),
             ("date", ">=", data["start_date"]),
             ("date", "<=", data["end_date"]),
-            # ("company_id", "in", data["allowed_company_ids"]),
         ]
         if data["partner_ids"]:
             domain += [("partner_id", "in", data["partner_ids"])]
@@ -31,8 +29,8 @@ class ReportAged(models.AbstractModel):
 
     @api.model
     def _get_report_values(self, docids, data=None):
-        print(data)
         moves = self.env["account.move"].search(self._get_domain(data))
+        today = fields.Date.today()
         invoices = []
         for move in moves:
             invoices.append(
@@ -49,10 +47,7 @@ class ReportAged(models.AbstractModel):
                     "total_signed": move.amount_total_signed,
                     "total": move.amount_total,
                     "residual": move.amount_residual_signed,
-                    "dias_retraso": (
-                        fields.Date.from_string(fields.Date.today())
-                        - move.invoice_date_due
-                    ).days,
+                    "dias_retraso": (today - move.invoice_date_due).days,
                     "invoice_user_id": move.invoice_user_id.name,
                     "move_type": move.move_type,
                 },
@@ -65,8 +60,6 @@ class ReportAged(models.AbstractModel):
                 i_aged_payment.append(i)
             if i["move_type"] in ["out_invoice", "out_refund"]:
                 i_aged_receive.append(i)
-        # for i_p in i_aged_payment:
-        #     i_p["residual"] = abs(i_p["residual"])
 
         wizard_id = data["wizard_id"]
         return {

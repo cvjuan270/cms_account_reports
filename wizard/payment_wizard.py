@@ -1,136 +1,203 @@
-import io
-from itertools import groupby
-from odoo import models, fields, api
-from datetime import datetime
 import hashlib
-import pytz
+from datetime import datetime
+from pprint import pprint
 
-pe_tz = pytz.timezone('America/Lima')
+import pytz
+from odoo import fields, models
+
+pe_tz = pytz.timezone("America/Lima")
 
 
 class PaymentWizard(models.TransientModel):
-    _name = 'payment.wizard'
-    _description = 'Asistente para Reporte de Pagos'
+    _name = "payment.wizard"
+    _description = "Asistente para Reporte de Pagos"
 
-    user_id = fields.Many2one('res.users', 'Cajero')
-    start_date = fields.Date(string='Fecha de inicio', required=True, default=lambda self: fields.datetime.now())
-    end_date = fields.Date(string='Fecha final', required=True, default=lambda self: fields.datetime.now())
+    user_id = fields.Many2one("res.users", "Cajero")
+    start_date = fields.Date(
+        string="Fecha de inicio",
+        required=True,
+        default=lambda self: fields.Date.today(),
+    )
+    end_date = fields.Date(
+        string="Fecha final",
+        required=True,
+        default=lambda self: fields.Date.today(),
+    )
 
-    @api.model
     def search_item(self, lst, journal_id):
         for item in lst:
-            if item['journal_id'] == journal_id:
+            if item["journal_id"] == journal_id:
                 return item
         return False
 
-    @api.model
     def _get_qr_and_hash(self, lst, amounts):
-        rslt = {'qr': '', 'hash': ''}
+        rslt = {"qr": "", "hash": ""}
         qr = "%s|%s|%s|%s|%s|%s|%s|%s|%s|%s|%s" % (
             self.env.user.name,
             str(datetime.now(pe_tz)),
             self.user_id.name,
-            str(self.start_date) + '-' + str(self.end_date),
-            amounts['sum_amount_cash_cf'],
-            amounts['sum_amount_cash_sf'],
-            amounts['sum_amount_cash_sc'],
-            amounts['sum_amount_bank_cf'],
-            amounts['sum_amount_bank_sf'],
-            amounts['sum_amount_bank_sc'],
-            sum(amounts.values())
-            )
-        rslt['qr'] = qr
-        rslt['hash'] = hashlib.sha256(qr.encode('utf-8')).hexdigest()
+            str(self.start_date) + "-" + str(self.end_date),
+            amounts["sum_amount_cash_cf"],
+            amounts["sum_amount_cash_sf"],
+            amounts["sum_amount_cash_sc"],
+            amounts["sum_amount_bank_cf"],
+            amounts["sum_amount_bank_sf"],
+            amounts["sum_amount_bank_sc"],
+            sum(amounts.values()),
+        )
+        rslt["qr"] = qr
+        rslt["hash"] = hashlib.sha256(qr.encode("utf-8")).hexdigest()
         return rslt
 
     def generate_report(self):
         lst = []
-        amounts = {'sum_amount_cash_cf': 0.00,
-                   'sum_amount_cash_sf': 0.00,
-                   'sum_amount_cash_sc': 0.00,
-                   'sum_amount_bank_cf': 0.00,
-                   'sum_amount_bank_sf': 0.00,
-                   'sum_amount_bank_sc': 0.00
-                   }
-        payments = self.env['account.payment'].read_group(
-            domain=[
-                ('state', '=', 'posted'),
-                ('user_id', '=', self.user_id.id),
-                ('date', '>=', self.start_date),
-                ('date', '<=', self.end_date)
-            ],
-            fields=['amount:sum'],
-            groupby=['journal_id'],
-            lazy=False
+        amounts = {
+            "sum_amount_cash_cf": 0.00,
+            "sum_amount_cash_sf": 0.00,
+            "sum_amount_cash_sc": 0.00,
+            "sum_amount_bank_cf": 0.00,
+            "sum_amount_bank_sf": 0.00,
+            "sum_amount_bank_sc": 0.00,
+        }
+        domain = [
+            ("state", "=", "paid"),
+            ("create_uid", "=", self.user_id.id),
+            ("date", ">=", self.start_date),
+            ("date", "<=", self.end_date),
+        ]
+        pprint(domain, indent=2)
+        payment_groups = self.env["account.payment"]._read_group(
+            domain=domain,
+            groupby=["journal_id"],
+            aggregates=["amount:sum"],
         )
-        for payment_group in payments:
+        print("payment_groups")
+        pprint(payment_groups, indent=2)
+
+        for journal, amount_sum in payment_groups:
             dict_payments = {}
 
-            dict_payments['payments'] = []
-            dict_payments['group_payment_journal'] = payment_group
-            _payments = self.env['account.payment'].search(payment_group['__domain'])
+            dict_payments["payments"] = []
+            dict_payments["group_payment_journal"] = {
+                "journal_id": (journal.id, journal.display_name),
+                "amount": amount_sum,
+            }
+            _payments = self.env["account.payment"].search(
+                domain + [("journal_id", "=", journal.id)]
+            )
             for item in _payments:
                 payment = {
-                    'date': item.date,
-                    'name': item.name,
-                    'partner_id': item.partner_id.name if item.partner_id else '',
-                    'ref': item.ref,
-                    'amount': item.amount if item.payment_type == 'inbound' else item.amount * -1,
-                    'currency_id': item.currency_id.id,
+                    "date": item.date,
+                    "name": item.name,
+                    "partner_id": (
+                        item.partner_id.name if item.partner_id else ""
+                    ),
+                    "ref": item.memo,
+                    "amount": (
+                        item.amount
+                        if item.payment_type == "inbound"
+                        else item.amount * -1
+                    ),
+                    "currency_id": item.currency_id.id,
                 }
-                dict_payments['payments'].append(payment)
+                dict_payments["payments"].append(payment)
 
-                if item.journal_id.type == 'cash':
+                if item.journal_id.type == "cash":
                     if item.reconciled_invoice_ids:
-                        if item.reconciled_invoice_ids[0].journal_id.l10n_latam_use_documents:
-                            amounts['sum_amount_cash_cf'] += item.amount if item.payment_type == 'inbound' else item.amount * -1
+                        if item.reconciled_invoice_ids[
+                            0
+                        ].journal_id.l10n_latam_use_documents:
+                            amounts["sum_amount_cash_cf"] += (
+                                item.amount
+                                if item.payment_type == "inbound"
+                                else item.amount * -1
+                            )
                         else:
-                            amounts['sum_amount_cash_sf'] += item.amount if item.payment_type == 'inbound' else item.amount * -1
+                            amounts["sum_amount_cash_sf"] += (
+                                item.amount
+                                if item.payment_type == "inbound"
+                                else item.amount * -1
+                            )
                     else:
                         if item.reconciled_bill_ids:
-                            if item.reconciled_bill_ids[0].journal_id.l10n_latam_use_documents:
-                                amounts[
-                                    'sum_amount_cash_cf'] += item.amount if item.payment_type == 'inbound' else item.amount * -1
+                            if item.reconciled_bill_ids[
+                                0
+                            ].journal_id.l10n_latam_use_documents:
+                                amounts["sum_amount_cash_cf"] += (
+                                    item.amount
+                                    if item.payment_type == "inbound"
+                                    else item.amount * -1
+                                )
                             else:
-                                amounts[
-                                    'sum_amount_cash_sf'] += item.amount if item.payment_type == 'inbound' else item.amount * -1
+                                amounts["sum_amount_cash_sf"] += (
+                                    item.amount
+                                    if item.payment_type == "inbound"
+                                    else item.amount * -1
+                                )
                         else:
-                            amounts['sum_amount_cash_sc'] += item.amount if item.payment_type == 'inbound' else item.amount * -1
+                            amounts["sum_amount_cash_sc"] += (
+                                item.amount
+                                if item.payment_type == "inbound"
+                                else item.amount * -1
+                            )
 
-                if item.journal_id.type == 'bank':
+                if item.journal_id.type == "bank":
                     if item.reconciled_invoice_ids:
-                        if item.reconciled_invoice_ids[0].journal_id.l10n_latam_use_documents:
-                            amounts[
-                                'sum_amount_bank_cf'] += item.amount if item.payment_type == 'inbound' else item.amount * -1
+                        if item.reconciled_invoice_ids[
+                            0
+                        ].journal_id.l10n_latam_use_documents:
+                            amounts["sum_amount_bank_cf"] += (
+                                item.amount
+                                if item.payment_type == "inbound"
+                                else item.amount * -1
+                            )
                         else:
-                            amounts['sum_amount_bank_sf'] += item.amount if item.payment_type == 'inbound' else item.amount * -1
+                            amounts["sum_amount_bank_sf"] += (
+                                item.amount
+                                if item.payment_type == "inbound"
+                                else item.amount * -1
+                            )
                     else:
                         if item.reconciled_bill_ids:
-                            if item.reconciled_bill_ids[0].journal_id.l10n_latam_use_documents:
-                                amounts[
-                                    'sum_amount_bank_cf'] += item.amount if item.payment_type == 'inbound' else item.amount * -1
+                            if item.reconciled_bill_ids[
+                                0
+                            ].journal_id.l10n_latam_use_documents:
+                                amounts["sum_amount_bank_cf"] += (
+                                    item.amount
+                                    if item.payment_type == "inbound"
+                                    else item.amount * -1
+                                )
                             else:
-                                amounts[
-                                    'sum_amount_bank_sf'] += item.amount if item.payment_type == 'inbound' else item.amount * -1
+                                amounts["sum_amount_bank_sf"] += (
+                                    item.amount
+                                    if item.payment_type == "inbound"
+                                    else item.amount * -1
+                                )
                         else:
-                            amounts['sum_amount_bank_sc'] += item.amount if item.payment_type == 'inbound' else item.amount * -1
+                            amounts["sum_amount_bank_sc"] += (
+                                item.amount
+                                if item.payment_type == "inbound"
+                                else item.amount * -1
+                            )
 
-            dict_payments['sum_amount_journal'] = sum(x['amount'] for x in dict_payments['payments'])
+            dict_payments["sum_amount_journal"] = sum(
+                x["amount"] for x in dict_payments["payments"]
+            )
 
             lst.append(dict_payments)
         data = {
-            'user_id': self.user_id.name,
-            'lst_payments': lst,
-            'amounts': amounts,
-            # 'amount_invoices_sf': amount_invoices_sf,
-            # 'amount_invoices_cf': amount_invoices_cf,
-            # 'amount_invoices_sc': amount_invoices_sc,
-            # 'amount_cash': sum(payment['amount'] for payment in payments if payment.journal_id.type == 'cash'),
-            # 'amount_bank': sum(payment['amount'] for payment in payments if payment.journal_id.type == 'bank'),
-            'res_company': self.env.company,
-            'qr_and_hash': self._get_qr_and_hash(lst, amounts),
+            "user_id": self.user_id.name,
+            "lst_payments": lst,
+            "amounts": amounts,
+            "res_company": self.env.company,
+            "qr_and_hash": self._get_qr_and_hash(lst, amounts),
         }
 
-        report = self.env['ir.actions.report'].search([('report_name', '=', 'cms_account_reports.payments')],
-                                                      limit=1).report_action(self, data=data)
+        report = (
+            self.env["ir.actions.report"]
+            .search(
+                [("report_name", "=", "cms_account_reports.payments")], limit=1
+            )
+            .report_action(self, data=data)
+        )
         return report

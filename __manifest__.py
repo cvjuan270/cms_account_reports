@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 {
     "name": "Reportes Contables CMS",
     "summary": """
@@ -9,10 +8,10 @@
     "author": "Juan Collado Vassquez.",
     "website": "https://tagre.app",
     # Categories can be used to filter modules in modules listing
-    # Check https://github.com/odoo/odoo/blob/16.0/odoo/addons/base/data/ir_module_category_data.xml
+    # Check https://github.com/odoo/odoo/blob/18.0/odoo/addons/base/data/ir_module_category_data.xml
     # for the full list
     "category": "Accounting/Localizations/Reporting",
-    "version": "0.1",
+    "version": "18.0.1.0.0",
     "license": "LGPL-3",
     # any module necessary for this one to work correctly
     "depends": ["base", "account", "l10n_pe", "l10n_latam_base"],
@@ -32,4 +31,9 @@
         "reports/aged_payable.xml",
         "reports/aged_receivable.xml",
     ],
+    "assets": {
+        "web.report_assets_common": [
+            "cms_account_reports/static/src/css/report.css",
+        ],
+    },
 }

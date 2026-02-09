@@ -1,5 +1,4 @@
 from odoo import models, api, fields
-from datetime import datetime
 
 
 class CmsAgedPayable(models.AbstractModel):

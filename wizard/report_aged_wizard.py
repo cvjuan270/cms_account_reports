@@ -1,24 +1,23 @@
-from datetime import datetime
 from dateutil.relativedelta import relativedelta
-
 
 from odoo import models, fields
 
 
 class AgedWizard(models.TransientModel):
     _name = "aged.wizard"
+    _description = "Asistente Reporte de Vencidos"
 
     start_date = fields.Date(
         string="Fecha de Inicio",
         required=True,
-        default=lambda self: fields.Date.to_string(datetime.now().replace(day=1)),
+        default=lambda self: fields.Date.today().replace(day=1),
     )
 
     end_date = fields.Date(
         string="Fecha Final",
         required=True,
-        default=lambda self: fields.Date.to_string(
-            (datetime.now() + relativedelta(months=+1, day=1, days=-1)).date()
+        default=lambda self: (
+            fields.Date.today() + relativedelta(months=+1, day=1, days=-1)
         ),
     )
 
@@ -40,7 +39,6 @@ class AgedWizard(models.TransientModel):
         }
 
     def get_report(self):
-        # data = {"doc_ids": self.ids, "doc_model": self._name, "docs": docs}
         data = self._prepare_report_aged()
         return self.env.ref("cms_account_reports.report_aged_report").report_action(
             self, data=data

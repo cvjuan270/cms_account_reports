@@ -7,9 +7,9 @@
     <field name="arch" type="xml">
       <field name="invoice_date" position="after">
         <label for="cms_a_r_operation_date" string="CMS Fecha Operativa" style="font-weight:bold;"
-          attrs="{'invisible': [('move_type', '=','entry')]}" />
+          invisible="move_type == 'entry'" />
         <field name="cms_a_r_operation_date" nolabel="1"
-          attrs="{'invisible': [('move_type', '=', 'entry')]}" />
+          invisible="move_type == 'entry'" />
       </field>
 
     </field>

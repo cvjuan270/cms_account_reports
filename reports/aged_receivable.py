@@ -1,5 +1,4 @@
 from odoo import models, api, fields
-from datetime import datetime
 
 
 class CmsAgedReceivable(models.AbstractModel):
@@ -15,6 +14,7 @@ class CmsAgedReceivable(models.AbstractModel):
     @api.model
     def _get_report_values(self, docids, data=None):
         moves = self.env["account.move"].search(self._get_domain(data))
+        today = fields.Date.today()
         invoices = []
         for move in moves:
             invoices.append(
@@ -33,10 +33,7 @@ class CmsAgedReceivable(models.AbstractModel):
                     "total_signed": move.amount_total_signed,
                     "total": move.amount_total,
                     "residual": move.amount_residual_signed,
-                    "dias_retraso": (
-                        fields.Date.from_string(fields.Date.today())
-                        - move.invoice_date_due
-                    ).days,
+                    "dias_retraso": (today - move.invoice_date_due).days,
                     "invoice_user_id": move.invoice_user_id.name,
                     "move_type": move.move_type,
                     "cms_a_r_operation_date": move.cms_a_r_operation_date.strftime(

@@ -4,6 +4,7 @@ from odoo import models
 class CmsAgedPayableWizard(models.TransientModel):
     _name = "cms_account_reports.aged_payable_wizard"
     _inherit = "cms_account_reports.abstract_wizard"
+    _description = "Asistente Reporte Cuentas por Pagar"
 
     def get_report(self):
         data = self._prepare_report_data()

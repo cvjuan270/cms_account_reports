@@ -1,5 +1,4 @@
-from odoo import models, fields, api
-from datetime import datetime
+from odoo import models, fields
 from dateutil.relativedelta import relativedelta
 
 
@@ -10,14 +9,14 @@ class CmsAbstractWizard(models.AbstractModel):
     start_date = fields.Date(
         string="Fecha de Inicio",
         required=True,
-        default=lambda self: fields.Date.to_string(datetime.now().replace(day=1)),
+        default=lambda self: fields.Date.today().replace(day=1),
     )
 
     end_date = fields.Date(
         string="Fecha Final",
         required=True,
-        default=lambda self: fields.Date.to_string(
-            (datetime.now() + relativedelta(months=+1, day=1, days=-1)).date()
+        default=lambda self: (
+            fields.Date.today() + relativedelta(months=+1, day=1, days=-1)
         ),
     )
 
