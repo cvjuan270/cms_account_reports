@@ -4,100 +4,387 @@
         <t t-call="web.html_container">
             <t t-call="web.external_layout">
                 <div class="page">
-                    <div class="container mt-4">
+                    <div class="container">
 
+                        <!-- ============== ENCABEZADO ============== -->
+                        <div class="border-start border-4 border-primary bg-light rounded p-3 mb-3">
+                            <h4 class="text-primary fw-bold mb-2">
+                                <i class="fa fa-cash-register me-2"/>Reporte de Caja por Cajero
+                            </h4>
+                            <div class="d-flex flex-wrap gap-3 small">
+                                <div>
+                                    <i class="fa fa-user-circle text-primary me-1"/>
+                                    <strong>Cajero:</strong>
+                                    <span t-esc="user_id"/>
+                                    <t t-if="user_login">
+                                        <span class="text-muted"> (<t t-esc="user_login"/>)</span>
+                                    </t>
+                                </div>
+                                <div>
+                                    <i class="fa fa-calendar text-primary me-1"/>
+                                    <strong>Periodo:</strong>
+                                    <span t-esc="start_date"/>
+                                    <i class="fa fa-arrow-right mx-1 text-muted"/>
+                                    <span t-esc="end_date"/>
+                                </div>
+                                <div>
+                                    <i class="fa fa-print text-primary me-1"/>
+                                    <strong>Generado:</strong>
+                                    <span t-esc="report_datetime"/>
+                                    <span class="text-muted"> por <t t-esc="report_user"/></span>
+                                </div>
+                            </div>
+                        </div>
 
-                        <h5><span>Caja: <t t-esc="user_id"/></span></h5>
+                        <!-- ============== TARJETAS DE RESUMEN ============== -->
+                        <div class="row g-2 mb-3">
+                            <div class="col-3">
+                                <div class="card border-0 shadow-sm border-start border-4 border-primary h-100">
+                                    <div class="card-body py-2 px-3 d-flex align-items-center">
+                                        <i class="fa fa-coins fa-2x text-primary me-3"/>
+                                        <div>
+                                            <div class="text-uppercase small text-muted lh-1">Total Neto</div>
+                                            <div class="fw-bold fs-6 lh-sm">
+                                                <span t-esc="summary['net_total']"
+                                                      t-options="{'widget': 'monetary', 'display_currency': res_company.currency_id}"/>
+                                            </div>
+                                            <div class="small text-muted">
+                                                <span t-esc="summary['count_total']"/> operaciones
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-3">
+                                <div class="card border-0 shadow-sm border-start border-4 border-success h-100">
+                                    <div class="card-body py-2 px-3 d-flex align-items-center">
+                                        <i class="fa fa-arrow-down fa-2x text-success me-3"/>
+                                        <div>
+                                            <div class="text-uppercase small text-muted lh-1">Ingresos</div>
+                                            <div class="fw-bold fs-6 lh-sm">
+                                                <span t-esc="summary['total_inbound']"
+                                                      t-options="{'widget': 'monetary', 'display_currency': res_company.currency_id}"/>
+                                            </div>
+                                            <div class="small text-muted">
+                                                <span t-esc="summary['count_inbound']"/> cobros
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-3">
+                                <div class="card border-0 shadow-sm border-start border-4 border-danger h-100">
+                                    <div class="card-body py-2 px-3 d-flex align-items-center">
+                                        <i class="fa fa-arrow-up fa-2x text-danger me-3"/>
+                                        <div>
+                                            <div class="text-uppercase small text-muted lh-1">Egresos / Devol.</div>
+                                            <div class="fw-bold fs-6 lh-sm">
+                                                <span t-esc="summary['total_outbound']"
+                                                      t-options="{'widget': 'monetary', 'display_currency': res_company.currency_id}"/>
+                                            </div>
+                                            <div class="small text-muted">
+                                                <span t-esc="summary['count_outbound']"/> egresos
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-3">
+                                <div class="card border-0 shadow-sm border-start border-4 border-info h-100">
+                                    <div class="card-body py-2 px-3 d-flex align-items-center">
+                                        <i class="fa fa-users fa-2x text-info me-3"/>
+                                        <div>
+                                            <div class="text-uppercase small text-muted lh-1">Clientes</div>
+                                            <div class="fw-bold fs-6 lh-sm">
+                                                <span t-esc="summary['unique_partners']"/>
+                                            </div>
+                                            <div class="small text-muted">
+                                                Tkt. prom.
+                                                <span t-esc="summary['avg_amount']"
+                                                      t-options="{'widget': 'monetary', 'display_currency': res_company.currency_id}"/>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
 
-                        <table class="table table-sm">
+                        <!-- ============== DETALLE POR DIARIO ============== -->
+                        <h6 class="text-uppercase fw-bold text-primary border-bottom border-2 border-primary pb-1 mt-3 mb-2">
+                            <i class="fa fa-list-ul me-1"/>Detalle de operaciones por diario
+                        </h6>
+
+                        <table class="table table-sm table-striped table-hover small">
+                            <thead class="table-dark">
+                                <tr>
+                                    <th style="width: 80px;">Fecha</th>
+                                    <th>Documento</th>
+                                    <th>Cliente / Proveedor</th>
+                                    <th>Referencia</th>
+                                    <th class="text-center" style="width: 70px;">Tipo</th>
+                                    <th class="text-end" style="width: 110px;">Monto</th>
+                                </tr>
+                            </thead>
                             <tbody>
                                 <t t-foreach="lst_payments" t-as="group">
-                                    <tr>
-                                        <td colspan="4">
-                                            <strong>Diario: <t
-                                                    t-esc="group['group_payment_journal']['journal_id'][1]"/></strong>
+                                    <tr class="table-info">
+                                        <td colspan="5">
+                                            <i t-att-class="'fa me-1 text-primary ' + ('fa-money-bill-wave' if group.get('journal_type') == 'cash' else 'fa-university')"/>
+                                            <strong>Diario:
+                                                <t t-esc="group['group_payment_journal']['journal_id'][1]"/>
+                                            </strong>
+                                            <span class="badge bg-primary ms-2">
+                                                <t t-esc="group['journal_count']"/> ops.
+                                            </span>
                                         </td>
-                                        <td class="text-right">
+                                        <td class="text-end">
                                             <strong>
-                                                <t t-esc="group['sum_amount_journal']"/>
+                                                <span t-esc="group['sum_amount_journal']"
+                                                      t-options="{'widget': 'monetary', 'display_currency': res_company.currency_id}"/>
                                             </strong>
                                         </td>
                                     </tr>
                                     <t t-foreach="group['payments']" t-as="p">
-
                                         <tr>
-                                            <td>
-                                                <small t-esc="p['date']"/>
+                                            <td><t t-esc="p['date']"/></td>
+                                            <td><t t-esc="p['name']"/></td>
+                                            <td><t t-esc="p['partner_id']"/></td>
+                                            <td><t t-esc="p['ref']"/></td>
+                                            <td class="text-center">
+                                                <t t-set="b" t-value="p.get('bucket','')"/>
+                                                <t t-if="b.endswith('_cf')">
+                                                    <span class="badge bg-success">CF</span>
+                                                </t>
+                                                <t t-elif="b.endswith('_sf')">
+                                                    <span class="badge bg-warning text-dark">SF</span>
+                                                </t>
+                                                <t t-elif="b.endswith('_sc')">
+                                                    <span class="badge bg-danger">SC</span>
+                                                </t>
                                             </td>
-                                            <td>
-                                                <small t-esc="p['name']"/>
-                                            </td>
-                                            <td>
-                                                <small t-esc="p['partner_id']"/>
-                                            </td>
-                                            <td>
-                                                <small t-esc="p['ref']"/>
-                                            </td>
-                                            <t t-set="CurrencyId" t-value="p['currency_id']"/>
-                                            <td class="text-right">
-                                                <small t-esc="p['amount']"
-                                                       t-options="{'widget': 'monetary', 'display_currency': res_company.currency_id}"
-                                                />
+                                            <td class="text-end">
+                                                <span t-att-class="'fw-semibold ' + ('text-danger' if p['amount'] &lt; 0 else 'text-success')">
+                                                    <span t-esc="p['amount']"
+                                                          t-options="{'widget': 'monetary', 'display_currency': res_company.currency_id}"/>
+                                                </span>
                                             </td>
                                         </tr>
                                     </t>
                                 </t>
                             </tbody>
-                            <tfoot>
-                                <!-- CASH -->
-                                <tr>
-                                    <th rowspan="3">Cash</th>
-                                    <td>venta C-F</td>
-                                    <td><t t-out="amounts['sum_amount_cash_cf']"/></td>
-                                    <td rowspan="3"><t t-out="amounts['sum_amount_cash_cf']+amounts['sum_amount_cash_sf']+amounts['sum_amount_cash_sc']"/></td>
-                                </tr>
-                                <tr>
-                                    <td>Venta S-F</td>
-                                    <td><t t-out="amounts['sum_amount_cash_sf']"/></td>
-                                </tr>
-                                <tr>
-                                    <td>Pago S-C</td>
-                                    <td><t t-out="amounts['sum_amount_cash_sc']"/></td>
-                                </tr>
-                                <!-- BANK -->
-                                <tr>
-                                    <th rowspan="3">Bank</th>
-                                    <td>venta C-F</td>
-                                    <td><t t-out="amounts['sum_amount_bank_cf']"/></td>
-                                    <td rowspan="3"><t t-out="amounts['sum_amount_bank_cf']+amounts['sum_amount_bank_sf']+amounts['sum_amount_bank_sc']"/></td>
-                                </tr>
-                                <tr>
-                                    <td>Venta S-F</td>
-                                    <td><t t-out="amounts['sum_amount_bank_sf']"/></td>
-                                </tr>
-                                <tr>
-                                    <td>Pago S-C</td>
-                                    <td><t t-out="amounts['sum_amount_bank_sc']"/></td>
-                                </tr>
-                            </tfoot>
                         </table>
 
-                        <div class="row justify-content-center">
-                            <div class="col-4">
-                                <div style="border-bottom: 1px solid #ccc; height: 6em;"/>
-                                <h6 style="text-align: center;">Recibi Conforme<br/>
-                                    <t t-esc="context_timestamp(datetime.datetime.now()).strftime('%Y-%m-%d %H:%M')"/></h6>
+                        <!-- ============== CUADRE DE CAJA ============== -->
+                        <h6 class="text-uppercase fw-bold text-primary border-bottom border-2 border-primary pb-1 mt-3 mb-2">
+                            <i class="fa fa-balance-scale me-1"/>Cuadre de caja
+                        </h6>
+
+                        <div class="row g-2 mb-2">
+                            <!-- CASH -->
+                            <div class="col-6">
+                                <div class="card border-success shadow-sm h-100">
+                                    <div class="card-header bg-success text-white py-2 d-flex align-items-center gap-2">
+                                        <i class="fa fa-money-bill-wave"/>
+                                        <strong>Efectivo (Cash)</strong>
+                                        <span class="badge bg-light text-success ms-auto">
+                                            <t t-esc="summary['count_cash']"/> ops.
+                                        </span>
+                                    </div>
+                                    <table class="table table-sm small mb-0">
+                                        <tbody>
+                                            <tr>
+                                                <td>
+                                                    <span class="badge bg-success me-1">CF</span>Venta con factura
+                                                </td>
+                                                <td class="text-center text-muted small">
+                                                    <t t-esc="counts['count_cash_cf']"/>
+                                                </td>
+                                                <td class="text-end">
+                                                    <span t-out="amounts['sum_amount_cash_cf']"
+                                                          t-options="{'widget': 'monetary', 'display_currency': res_company.currency_id}"/>
+                                                </td>
+                                            </tr>
+                                            <tr>
+                                                <td>
+                                                    <span class="badge bg-warning text-dark me-1">SF</span>Venta sin factura
+                                                </td>
+                                                <td class="text-center text-muted small">
+                                                    <t t-esc="counts['count_cash_sf']"/>
+                                                </td>
+                                                <td class="text-end">
+                                                    <span t-out="amounts['sum_amount_cash_sf']"
+                                                          t-options="{'widget': 'monetary', 'display_currency': res_company.currency_id}"/>
+                                                </td>
+                                            </tr>
+                                            <tr>
+                                                <td>
+                                                    <span class="badge bg-danger me-1">SC</span>Pago sin conciliar
+                                                </td>
+                                                <td class="text-center text-muted small">
+                                                    <t t-esc="counts['count_cash_sc']"/>
+                                                </td>
+                                                <td class="text-end">
+                                                    <span t-out="amounts['sum_amount_cash_sc']"
+                                                          t-options="{'widget': 'monetary', 'display_currency': res_company.currency_id}"/>
+                                                </td>
+                                            </tr>
+                                        </tbody>
+                                        <tfoot class="table-light border-top">
+                                            <tr>
+                                                <td colspan="2"><strong>Total Cash</strong></td>
+                                                <td class="text-end fw-bold text-success">
+                                                    <span t-out="summary['total_cash']"
+                                                          t-options="{'widget': 'monetary', 'display_currency': res_company.currency_id}"/>
+                                                </td>
+                                            </tr>
+                                        </tfoot>
+                                    </table>
+                                </div>
                             </div>
-                            <div class="col-4">
-                                <div style="border-bottom: 1px solid #ccc; height: 6em;"/>
-                                <h6 style="text-align: center;">Entregue Conforme<br/>
-                                    <t t-esc="context_timestamp(datetime.datetime.now()).strftime('%Y-%m-%d %H:%M')"/></h6>
+
+                            <!-- BANK -->
+                            <div class="col-6">
+                                <div class="card border-primary shadow-sm h-100">
+                                    <div class="card-header bg-primary text-white py-2 d-flex align-items-center gap-2">
+                                        <i class="fa fa-university"/>
+                                        <strong>Banco (Bank)</strong>
+                                        <span class="badge bg-light text-primary ms-auto">
+                                            <t t-esc="summary['count_bank']"/> ops.
+                                        </span>
+                                    </div>
+                                    <table class="table table-sm small mb-0">
+                                        <tbody>
+                                            <tr>
+                                                <td>
+                                                    <span class="badge bg-success me-1">CF</span>Venta con factura
+                                                </td>
+                                                <td class="text-center text-muted small">
+                                                    <t t-esc="counts['count_bank_cf']"/>
+                                                </td>
+                                                <td class="text-end">
+                                                    <span t-out="amounts['sum_amount_bank_cf']"
+                                                          t-options="{'widget': 'monetary', 'display_currency': res_company.currency_id}"/>
+                                                </td>
+                                            </tr>
+                                            <tr>
+                                                <td>
+                                                    <span class="badge bg-warning text-dark me-1">SF</span>Venta sin factura
+                                                </td>
+                                                <td class="text-center text-muted small">
+                                                    <t t-esc="counts['count_bank_sf']"/>
+                                                </td>
+                                                <td class="text-end">
+                                                    <span t-out="amounts['sum_amount_bank_sf']"
+                                                          t-options="{'widget': 'monetary', 'display_currency': res_company.currency_id}"/>
+                                                </td>
+                                            </tr>
+                                            <tr>
+                                                <td>
+                                                    <span class="badge bg-danger me-1">SC</span>Pago sin conciliar
+                                                </td>
+                                                <td class="text-center text-muted small">
+                                                    <t t-esc="counts['count_bank_sc']"/>
+                                                </td>
+                                                <td class="text-end">
+                                                    <span t-out="amounts['sum_amount_bank_sc']"
+                                                          t-options="{'widget': 'monetary', 'display_currency': res_company.currency_id}"/>
+                                                </td>
+                                            </tr>
+                                        </tbody>
+                                        <tfoot class="table-light border-top">
+                                            <tr>
+                                                <td colspan="2"><strong>Total Bank</strong></td>
+                                                <td class="text-end fw-bold text-primary">
+                                                    <span t-out="summary['total_bank']"
+                                                          t-options="{'widget': 'monetary', 'display_currency': res_company.currency_id}"/>
+                                                </td>
+                                            </tr>
+                                        </tfoot>
+                                    </table>
+                                </div>
                             </div>
                         </div>
-                        <div class="row">
-                            <div class="col-6">
+
+                        <!-- TOTAL GENERAL -->
+                        <div class="alert alert-primary d-flex align-items-center mb-3 py-2">
+                            <i class="fa fa-check-circle fa-lg me-2"/>
+                            <span class="fw-semibold">Total General de Caja:</span>
+                            <strong class="ms-auto fs-5">
+                                <span t-out="summary['net_total']"
+                                      t-options="{'widget': 'monetary', 'display_currency': res_company.currency_id}"/>
+                            </strong>
+                        </div>
+
+                        <!-- ============== TOP CLIENTES ============== -->
+                        <t t-if="top_partners">
+                            <h6 class="text-uppercase fw-bold text-primary border-bottom border-2 border-primary pb-1 mt-3 mb-2">
+                                <i class="fa fa-trophy text-warning me-1"/>Top 5 clientes del periodo
+                            </h6>
+                            <table class="table table-sm table-striped small">
+                                <thead class="table-warning">
+                                    <tr>
+                                        <th style="width: 40px;">#</th>
+                                        <th>Cliente</th>
+                                        <th class="text-center" style="width: 90px;">Operaciones</th>
+                                        <th class="text-end" style="width: 130px;">Monto</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <t t-foreach="top_partners" t-as="tp">
+                                        <tr>
+                                            <td>
+                                                <span class="badge rounded-pill bg-warning text-dark" t-esc="tp_index + 1"/>
+                                            </td>
+                                            <td><t t-esc="tp['name']"/></td>
+                                            <td class="text-center"><t t-esc="tp['count']"/></td>
+                                            <td class="text-end fw-semibold">
+                                                <span t-esc="tp['amount']"
+                                                      t-options="{'widget': 'monetary', 'display_currency': res_company.currency_id}"/>
+                                            </td>
+                                        </tr>
+                                    </t>
+                                </tbody>
+                            </table>
+                        </t>
+
+                        <!-- ============== FIRMAS ============== -->
+                        <div class="row justify-content-center mt-5 mb-3">
+                            <div class="col-4 text-center">
+                                <div class="border-bottom border-secondary" style="height: 4em;"/>
+                                <div class="fw-semibold text-primary mt-1">
+                                    <i class="fa fa-check text-success me-1"/>Recibí Conforme
+                                </div>
+                                <small class="text-muted">
+                                    <t t-esc="context_timestamp(datetime.datetime.now()).strftime('%Y-%m-%d %H:%M')"/>
+                                </small>
+                            </div>
+                            <div class="col-4 text-center">
+                                <div class="border-bottom border-secondary" style="height: 4em;"/>
+                                <div class="fw-semibold text-primary mt-1">
+                                    <i class="fa fa-handshake text-success me-1"/>Entregué Conforme
+                                </div>
+                                <small class="text-muted">
+                                    <t t-esc="context_timestamp(datetime.datetime.now()).strftime('%Y-%m-%d %H:%M')"/>
+                                </small>
+                            </div>
+                        </div>
+
+                        <!-- ============== QR + HASH ============== -->
+                        <div class="row bg-light border border-secondary border-opacity-25 rounded p-2 mt-2">
+                            <div class="col-3 text-center">
                                 <img t-att-src="'/report/barcode/?barcode_type=%s&amp;value=%s&amp;width=%s&amp;height=%s' % ('QR', qr_and_hash['qr'],100,100)"/>
-                                <p><t t-esc="qr_and_hash['hash']"/></p>
+                            </div>
+                            <div class="col-9">
+                                <div class="small mb-1">
+                                    <i class="fa fa-shield-alt text-secondary me-1"/>
+                                    <strong>Firma digital del reporte</strong>
+                                </div>
+                                <p class="font-monospace text-muted mb-1" style="font-size: 9px; word-break: break-all;">
+                                    <t t-esc="qr_and_hash['hash']"/>
+                                </p>
+                                <p class="text-muted small mb-0">
+                                    Hash SHA-256 generado a partir del cajero, periodo y montos del cuadre.
+                                </p>
                             </div>
                         </div>
                     </div>
