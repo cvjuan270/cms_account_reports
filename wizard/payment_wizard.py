@@ -60,7 +60,7 @@ class PaymentWizard(models.TransientModel):
             "sum_amount_bank_sc": 0.00,
         }
         domain = [
-            ("state", "=", "paid"),
+            ("state", "in", ("paid", "in_process")),
             ("create_uid", "=", self.user_id.id),
             ("date", ">=", self.start_date),
             ("date", "<=", self.end_date),
