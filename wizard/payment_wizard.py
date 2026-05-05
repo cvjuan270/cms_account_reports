@@ -89,7 +89,8 @@ class PaymentWizard(models.TransientModel):
         counts = {k.replace("sum_amount_", "count_"): 0 for k in amounts}
 
         domain = [
-            ("state", "=", "paid"),
+            ("state", "in", ("paid", "in_process")),
+            ("paired_internal_transfer_payment_id", "=", False),
             ("create_uid", "=", self.user_id.id),
             ("date", ">=", self.start_date),
             ("date", "<=", self.end_date),
